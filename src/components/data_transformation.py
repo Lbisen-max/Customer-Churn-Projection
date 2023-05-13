@@ -111,8 +111,8 @@ class DataTransformation:
 
             logging.info("Obtaining preprocessing object")
 
-            # train_df = self.replace_data(train_df)
-            # train_df = self.upsample_minority_class(train_df,'Yes', 'No')
+            train_df = self.replace_data(train_df)
+            train_df = self.upsample_minority_class(train_df,'Yes', 'No')
             preprocessing_object=self.get_data_transformer_obj()
             preprocessing_label_object=self.get_data_transformer_label_object()
 
