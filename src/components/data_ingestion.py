@@ -3,12 +3,15 @@ import pandas as pd
 import sys
 from exception import CustomException
 from src.logger import logging
+import dill
 
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 
 from src.components.data_transformation import DataTransformation
 from src.components.data_transformation import DataTransformationConfig
+from src.components.data_cleaning import DataCleaning
+
 
 @dataclass
 class DataIngestionConfig:
@@ -56,10 +59,13 @@ class DataIngestion:
 
 if __name__=="__main__":
     obj = DataIngestion()
-    train_data,test_data=obj.initiate_data_ingestion()
+    raw_data_imgestion=obj.initiate_data_ingestion()
 
-    data_transformation = DataTransformation()
-    data_transformation.initiate_data_transformation(train_data,test_data)
+    obj2 = DataCleaning()
+    raw_arr = obj2.initiate_data_cleaning()
+
+    obj3 = DataTransformation()
+    obj3.initiate_data_transformation()
 
 
 

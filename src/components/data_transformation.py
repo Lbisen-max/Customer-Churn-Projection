@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import sys
+import dill
 
 from dataclasses import dataclass
 from sklearn.preprocessing import StandardScaler,LabelEncoder,OneHotEncoder,OrdinalEncoder
@@ -13,10 +14,11 @@ from sklearn.utils import resample
 
 from exception import CustomException
 from src.logger import logging
+from src.utils import save_object
 
 @dataclass
 class DataTransformationConfig:
-    Preprocessor_obj_file_path = os.path.join('artifcat',"Preprocessor.pkl")
+    Preprocessor_obj_file_path = os.path.join('artifacts',"Preprocessor.pkl")
 
 
 class DataTransformation:
@@ -24,44 +26,16 @@ class DataTransformation:
 
     def __init__(self):
         self.data_transformation_config=DataTransformationConfig()
-
-
-    def replace_data(self, column):
-        column = column.str.replace('No internet service', 'No')
-        column = column.str.replace('No phone service', 'No')
-        return column
-    
-    def upsample_minority_class(self, data, minority_class_label, majority_class_label):
-        minority = data[data['Churn'] == minority_class_label]
-        majority = data[data['Churn'] == majority_class_label]
-
-        minority_upsampled = resample(minority, replace=True, n_samples=majority.shape[0])
-        data = pd.concat([minority_upsampled, majority], axis=0)
-        return data
-    
-    def preprocess_data(self, data):
-        data['TotalCharges'] = data['TotalCharges'].replace(" ", np.nan)
-        data = data[data['TotalCharges'].notnull()]
-        data = data.reset_index()[data.columns]
-        data['TotalCharges'] = data['TotalCharges'].astype(float)
-        data['MultipleLines'] = self.replace_data(data['MultipleLines'])
-        data['OnlineSecurity'] = self.replace_data(data['OnlineSecurity'])
-        data['OnlineBackup'] = self.replace_data(data['OnlineBackup'])
-        data['DeviceProtection'] = self.replace_data(data['DeviceProtection'])
-        data['TechSupport'] = self.replace_data(data['TechSupport'])
-        data['StreamingTV'] = self.replace_data(data['StreamingTV'])
-        data['StreamingMovies'] = self.replace_data(data['StreamingMovies'])
-
-        return data
     
     def get_data_transformer_obj(self):
 
         try:
+
             numeric_columns = ['SeniorCitizen', 'tenure', 'MonthlyCharges', 'TotalCharges']
             categorical_columns = ['gender', 'Partner', 'Dependents', 'PhoneService', 'MultipleLines',
-       'InternetService', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
-       'TechSupport', 'StreamingTV', 'StreamingMovies', 'Contract',
-       'PaperlessBilling', 'PaymentMethod']
+                  'InternetService', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
+                 'TechSupport', 'StreamingTV', 'StreamingMovies', 'Contract',
+                   'PaperlessBilling', 'PaymentMethod']
             
             num_pipeline = Pipeline(
                 steps=[
@@ -70,7 +44,7 @@ class DataTransformation:
             
 
             cat_pipeline = Pipeline(
-                steps=["Encoding",OrdinalEncoder()]
+                steps=[("Encoding",OrdinalEncoder())]
             )
             
             logging.info("Pipeline created and completed")
@@ -102,17 +76,16 @@ class DataTransformation:
             raise CustomException(e,sys)
         
 
-    def initiate_data_transformation(self,train_path,test_path):
+    def initiate_data_transformation(self):
         try:
-            train_df = pd.read_csv(train_path)
-            test_df = pd.read_csv(test_path)
+            train_df = pd.read_csv("artifacts/train_cleaned.csv")
+            test_df = pd.read_csv("artifacts/test_cleaned.csv")
 
             logging.info("Read train and test data completed")
 
             logging.info("Obtaining preprocessing object")
 
-            train_df = self.replace_data(train_df)
-            train_df = self.upsample_minority_class(train_df,'Yes', 'No')
+
             preprocessing_object=self.get_data_transformer_obj()
             preprocessing_label_object=self.get_data_transformer_label_object()
 
@@ -153,12 +126,12 @@ class DataTransformation:
             logging.info(f"Saved preprocessing object.")
 
             save_object(
-                file_path=self.Data_transformation_config.preprocessor_ob_file_path,
-                obj=preprocessing_obj
+                file_path=self.data_transformation_config.Preprocessor_obj_file_path,
+                obj=preprocessing_object 
             )
 
             return (
-                train_arr,test_arr,self.Data_transformation_config.preprocessor_ob_file_path,
+                train_arr,test_arr,self.data_transformation_config.Preprocessor_obj_file_path
             )
         
         except Exception as e:
