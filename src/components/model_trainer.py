@@ -72,7 +72,8 @@ class ModelTrainer:
                  "KNeighborsClassifier":{
                      "n_neighbors":[3, 5, 7, 9, 11],
                      "weights" : ['uniform', 'distance'],
-                     "p" :  [1, 2]
+                     "p" :  [1, 2],
+                     'metric': ['euclidean', 'manhattan']
                  },
                  "DecisionTreeClassifier" : {
                      "criterion" : ['gini', 'entropy'],
@@ -117,7 +118,7 @@ class ModelTrainer:
                 list(model_report.values()).index(best_model_score)]
             best_model = models[best_model_name]
 
-            if best_model_score<85:
+            if best_model_score<=80:
                 print("no best model")
                 
             logging.info(f"Found model on traning dataset")

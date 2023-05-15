@@ -23,7 +23,7 @@ def save_object(file_path,obj):
         raise CustomException(e,sys)
 
 
-def evaluate_model(X_train,y_train,X_test,y_test,models,param):
+def evaluate_model(X_train,y_train,X_test,y_test,models,param): 
 
     try:
         # Make predictions and evaluate each model using confusion matrices
