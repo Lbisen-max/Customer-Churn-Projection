@@ -69,12 +69,17 @@ class DataCleaning:
             df2['StreamingMovies'] = df2['StreamingMovies'].str.replace('No internet service', 'No')
             df2=df2.drop(['customerID'],axis=1)
 
-            # Upsampling the data
+            # Upsampling the train data
 
             minority = df1[df1.Churn=="Yes"]
             majority = df1[df1.Churn=="No"]
             minority_upsample = resample(minority, replace=True, n_samples=majority.shape[0])
             df1 = pd.concat([minority_upsample, majority], axis=0)
+
+            minority = df2[df2.Churn=="Yes"]
+            majority = df2[df2.Churn=="No"]
+            minority_upsample = resample(minority, replace=True, n_samples=majority.shape[0])
+            df2 = pd.concat([minority_upsample, majority], axis=0)
 
             logging.info('train and test data is cleaned and train data is resampled') 
 

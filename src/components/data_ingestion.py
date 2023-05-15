@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from src.components.data_transformation import DataTransformation
 from src.components.data_transformation import DataTransformationConfig
 from src.components.data_cleaning import DataCleaning
+from src.components.model_trainer import ModelTrainerConfig
+from src.components.model_trainer import ModelTrainer
 
 
 @dataclass
@@ -38,7 +40,7 @@ class DataIngestion:
 
             logging.info("Train test split initiated")
 
-            train_set,test_set=train_test_split(df,test_size=0.25,random_state=42)
+            train_set,test_set=train_test_split(df,test_size=0.20,random_state=42)
 
             train_set.to_csv(self.ingestion_config.train_data_path,index=False,header=True)
             test_set.to_csv(self.ingestion_config.test_data_path,index=False,header=True)
@@ -65,7 +67,10 @@ if __name__=="__main__":
     raw_arr = obj2.initiate_data_cleaning()
 
     obj3 = DataTransformation()
-    obj3.initiate_data_transformation()
+    train_arr,test_arr,_=obj3.initiate_data_transformation()
+
+    obj4=ModelTrainer()
+    print(obj4.initiate_model_trainer(train_arr,test_arr))
 
 
 
